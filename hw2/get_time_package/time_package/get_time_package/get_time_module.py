@@ -9,11 +9,13 @@ except ModuleNotFoundError:
 def get_time():
     url = 'http://worldtimeapi.org/api/timezone/Europe/Moscow'
     resp = requests.get(url)
-    unixtime = resp.json()['unixtime'] # if use get('unixtime') there is no key, use default value
+    unixtime = resp.json()['unixtime']
     return unixtime
+
 
 def print_time(unixtime):
     print(unixtime)
+
 
 def main():
     unixtime = get_time()
@@ -21,6 +23,7 @@ def main():
         print_time(unixtime)
     else:
         print_time_pretty(unixtime)
+
 
 if __name__ == '__main__':
     main()
