@@ -6,10 +6,10 @@ BASE_URL = f"https://api.telegram.org/bot{TOKEN}/"
 LONG_POLLING_TIMEOUT = 10
 
 def bot_function():
-    ...
+    pass
 
 
-def main(PLACEHOLDER_MSG="Привет") -> None:
+def main(PLACEHOLDER_MSG="Привет", any_arguments) -> None:
     last_update_id = None
 
     while True:
