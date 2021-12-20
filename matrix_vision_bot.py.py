@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import logging
-
-
 from telegram import Bot, Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
+
+import matrix_vision
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
