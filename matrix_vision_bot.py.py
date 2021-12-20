@@ -27,10 +27,17 @@ def chat_help(update: Update, context: CallbackContext):
     update.message.reply_text('Введи команду /start для начала. ')
 
 
-def echo(update: Update, context: CallbackContext):
-    """Echo the user message."""
-    #update.message.reply_text(update.message.text)
-    update.message.reply_text("!!!")
+def echo_text(update: Update, context: CallbackContext):
+    """Send some help to user."""
+    update.message.reply_text("Пожалуйста, пришлите мне фотографию, а не текст!")
+
+def echo_photo(update: Update, context: CallbackContext):
+    """Send echo photo to user."""
+    update.message.reply_photo(update.message.photo[-1])
+
+def echo_document(update: Update, context: CallbackContext):
+    """Send echo photo to user."""
+    update.message.reply_text("Пожалуйста, сожмите изображение при отправке!")
 
 
 def error(update: Update, context: CallbackContext):
@@ -51,8 +58,11 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CommandHandler('help', chat_help))
 
-    # on noncommand i.e message - echo the message on Telegram
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, echo))
+    # echo the message on Telegram
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, echo_text))
+    updater.dispatcher.add_handler(MessageHandler(Filters.photo, echo_photo))
+    updater.dispatcher.add_handler(MessageHandler(Filters.document, echo_document))
+
 
     # log all errors
     updater.dispatcher.add_error_handler(error)
