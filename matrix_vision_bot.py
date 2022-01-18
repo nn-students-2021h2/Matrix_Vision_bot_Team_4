@@ -3,8 +3,6 @@ from matrix_vision import MatrixVision
 from telegram import Bot, Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
 from configs import Config
-import urllib
-#import matrix_vision as mtr
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
