@@ -1,6 +1,6 @@
 import logging
-from matrix_vision import MatrixVision
-from telegram import Update
+from matrix_vision import Matrix, MatrixVision
+from telegram import Animation, Bot, Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
 from configs import Config
 
