@@ -8,7 +8,7 @@ class Matrix:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.font_size = 15
+        self.font_size = 8
         self.letters = np.array([chr(int('0x30a0', 16) + i) for i in range(96)] + ['' for i in range(10)])
         self.font = pg.font.Font('ms_mincho.ttf', self.font_size, bold=True)
         self.size = self.rows, self.columns = \
