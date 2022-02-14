@@ -1,8 +1,8 @@
 from datetime import datetime
 import functools
 import logging
-from matrix_vision import Matrix, MatrixVision
-from telegram import Animation, Bot, Update
+from matrix_vision import MatrixVision
+from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
 
 from matrix_vision.configs import Config
