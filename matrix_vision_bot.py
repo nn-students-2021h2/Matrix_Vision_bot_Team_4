@@ -1,6 +1,6 @@
 import logging
 from matrix_vision import MatrixVision
-from telegram import Bot, Update
+from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
 from configs import Config
 
@@ -24,20 +24,24 @@ def chat_help(update: Update, context: CallbackContext):
     update.message.reply_text('Send /start')
 
 
-def echo_text(update: Update, context: CallbackContext):
+def reply_to_text(update: Update, context: CallbackContext):
     """Send some help to user."""
-    update.message.reply_text("Image expected!")
+    update.message.reply_text("Image is expected!")
 
 
-def echo_photo(update: Update, context: CallbackContext):
+def reply_animation(update: Update, context: CallbackContext):
+    """Send animated photo in matrix vision style to user."""
+    image = update.message.photo[-1].get_file()
+    log.info("Image has been downloaded.")
+    matrix_vision = MatrixVision(image.download())
+    animation_file_id = matrix_vision.run()
+    with open(animation_file_id, 'rb') as animation:
+        update.message.reply_animation(animation = animation)
+
+
+def reply_to_document(update: Update, context: CallbackContext):
     """Send echo photo to user."""
-    MatrixVision().run()
-    update.message.reply_photo(update.message.photo[-1])
-
-
-def echo_document(update: Update, context: CallbackContext):
-    """Send echo photo to user."""
-    update.message.reply_text("")
+    update.message.reply_text("Image is expected!")
 
 
 def error(update: Update, context: CallbackContext):
@@ -54,9 +58,9 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('help', chat_help))
 
     # echo the message on Telegram
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, echo_text))
-    updater.dispatcher.add_handler(MessageHandler(Filters.photo, echo_photo))
-    updater.dispatcher.add_handler(MessageHandler(Filters.document, echo_document))
+    updater.dispatcher.add_handler(MessageHandler(Filters.photo, reply_animation))
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, reply_to_text))
+    updater.dispatcher.add_handler(MessageHandler(Filters.document, reply_to_document))
 
     # log all errors
     updater.dispatcher.add_error_handler(error)
