@@ -1,3 +1,5 @@
 {
-  "token": "<token>"
+  "token": "<token>",
+  "fonts_path": "fonts/ms_mincho.ttf",
+  "results_path": "results"
 }

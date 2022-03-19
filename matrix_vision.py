@@ -5,12 +5,12 @@ import pygame as pg
 
 
 class Matrix:
-    def __init__(self, width, height):
+    def __init__(self, width, height, font_path):
         self.width = width
         self.height = height
         self.font_size = 8
         self.letters = np.array([chr(int('0x30a0', 16) + i) for i in range(96)] + ['' for i in range(10)])
-        self.font = pg.font.Font('ms_mincho.ttf', self.font_size, bold=True)
+        self.font = pg.font.Font(font_path, self.font_size, bold=True)
         self.size = self.rows, self.columns = \
             height // self.font_size, width // self.font_size
         self.matrix = np.random.choice(self.letters, self.size)
@@ -58,7 +58,7 @@ class Matrix:
 
 
 class MatrixVision:
-    def __init__(self, image_name):
+    def __init__(self, image_name, font_path):
         pg.init()
         surf = pg.image.load(image_name) # convert_alpha()
         self.image = pg.pixelarray.PixelArray(surf)
@@ -66,7 +66,7 @@ class MatrixVision:
         self.surface = pg.Surface(self.size, pg.SRCALPHA)
         self.screen = pg.display.set_mode(self.size, pg.HIDDEN)
         self.clock = pg.time.Clock()
-        self.matrix = Matrix(self.width, self.height)
+        self.matrix = Matrix(self.width, self.height, font_path)
         self.images = []
 
     def draw(self):
