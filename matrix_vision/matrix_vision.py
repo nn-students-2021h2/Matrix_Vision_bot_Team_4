@@ -54,7 +54,7 @@ class Matrix:
         mask = np.argwhere(frames % self.char_intervals == 0)
         new_chars = np.random.choice(self.letters, mask.shape[0])
         self.matrix[mask[:, 0], mask[:, 1]] = new_chars
-    
+
     def run(self, surface, image):
         frames = pg.time.get_ticks()
         self.change_chars(frames)
@@ -63,7 +63,7 @@ class Matrix:
 
 
 class MatrixVision:
-    def __init__(self, source_data, font_path=None, fps=30, use_opencv=False):
+    def __init__(self, source_data, font_path=None, fps=30, display=0,use_opencv=False):
         pg.init()
         surface = None
         if isinstance(source_data, bytearray):
@@ -79,7 +79,7 @@ class MatrixVision:
         self.image = pg.pixelarray.PixelArray(surface)
         self.size = self.width, self.height = self.image.shape[0], self.image.shape[1]
         self.surface = pg.Surface(self.size, pg.SRCALPHA)
-        self.screen = pg.display.set_mode(self.size, pg.HIDDEN)
+        self.screen = pg.Surface(self.size) #pg.display.set_mode(self.size, pg.HIDDEN, display=display)
         self.clock = pg.time.Clock()
         self.matrix = Matrix(self.width, self.height, font_path)
         self.images = []
@@ -94,7 +94,8 @@ class MatrixVision:
         while counter < duration:
             self.draw()
             self.images.append(self.screen.copy())
-            pg.display.flip()
+            #self.screen
+            #pg.display.flip()
             counter += 1
             self.clock.tick(30)
         self.generate_animation(out_name)
@@ -112,4 +113,4 @@ class MatrixVision:
                 raise RuntimeError("Can't open cv2.VideoWriter()!")
         else:
             imageio.mimwrite(out_name, [pg.surfarray.array3d(img).swapaxes(0,1) for img in self.images], format='mp4', fps=self.fps)
-        log.info(f"Save result to {out_name}")
+        #log.info(f"Save result to {out_name}")

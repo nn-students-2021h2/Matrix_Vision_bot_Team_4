@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 import functools
 import logging
@@ -5,6 +6,7 @@ import os
 
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
+from telegram.ext.defaults import Defaults
 
 from matrix_vision.configs import Config
 from matrix_vision.matrix_vision import MatrixVision
@@ -37,17 +39,19 @@ def reply_to_text(update: Update, context: CallbackContext):
 
 def reply_to_image(update: Update, context: CallbackContext, config: Config):
     """Send animated photo in matrix vision style to user."""
-    img =  update.message.photo[-1]
-    matrix_vision = MatrixVision(img.get_file().download_as_bytearray(), config.properties['fonts_path'], fps=30)
-    log.info("Image has been downloaded.")
     user = update.message.from_user
+    img =  update.message.photo[-1]
+
+    matrix_vision = MatrixVision(img.get_file().download_as_bytearray(), config.properties['fonts_path'], fps=30)
+    log.info(f"Image from {user['username']} with ID {user['id']} has been downloaded.")
+
     animation_file_name = f"{user['id']}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.mp4"
     matrix_vision.run(animation_file_name)
     with open(animation_file_name, 'rb') as animation:
         update.message.reply_animation(animation = animation)
+
     os.remove(animation_file_name)
     log.info(f"Remove temporary file {animation_file_name}")
-
 
 
 def reply_to_document(update: Update, context: CallbackContext):
@@ -63,14 +67,15 @@ def error(update: Update, context: CallbackContext):
 
 def main():
     global_config = Config(file_path='config.json')
-    updater = Updater(global_config.properties['token'], use_context=True)
+    updater = Updater(global_config.properties['token'], defaults=Defaults(run_async=True),
+        workers=global_config.properties['threads_num'])
 
     # on different commands - answer in Telegram
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CommandHandler('help', chat_help))
 
     # add replies for image, documents and text messages on Telegram
-    updater.dispatcher.add_handler(MessageHandler(Filters.photo, functools.partial(reply_to_image, config = global_config)))
+    updater.dispatcher.add_handler(MessageHandler(Filters.photo, functools.partial(reply_to_image, config = copy.deepcopy(global_config))))
     updater.dispatcher.add_handler(MessageHandler(Filters.document, reply_to_document))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.text, reply_to_text))

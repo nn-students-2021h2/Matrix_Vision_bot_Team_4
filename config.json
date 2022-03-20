@@ -1,4 +1,5 @@
 {
   "token": "<token>",
-  "fonts_path": "fonts/ms_mincho.ttf"
+  "fonts_path": "fonts/ms_mincho.ttf",
+  "threads_num": 4
 }
