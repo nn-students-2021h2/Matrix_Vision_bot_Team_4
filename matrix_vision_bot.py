@@ -1,9 +1,13 @@
+from datetime import datetime
 import functools
 import logging
-from matrix_vision import MatrixVision
+import os
+
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
-from configs import Config
+
+from matrix_vision.configs import Config
+from matrix_vision.matrix_vision import MatrixVision
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,11 +21,13 @@ log = logging.getLogger()
 def start(update: Update, context: CallbackContext):
     """Send a message when the command /start is issued."""
     update.message.reply_text(f'Hi, {update.effective_user.first_name}!')
+    update.message.reply_text('Send /help to know about usage.')
 
 
 def chat_help(update: Update, context: CallbackContext):
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Send /start')
+    update.message.reply_text('Hi! I am bot for creating animation in matrix style from image.')
+    update.message.reply_text('To start just send me an image.')
 
 
 def reply_to_text(update: Update, context: CallbackContext):
@@ -29,14 +35,19 @@ def reply_to_text(update: Update, context: CallbackContext):
     update.message.reply_text("Image is expected!")
 
 
-def reply_animation(update: Update, context: CallbackContext, config: Config):
+def reply_to_image(update: Update, context: CallbackContext, config: Config):
     """Send animated photo in matrix vision style to user."""
-    image = update.message.photo[-1].get_file()
+    img =  update.message.photo[-1]
+    matrix_vision = MatrixVision(img.get_file().download_as_bytearray(), config.properties['fonts_path'], fps=30)
     log.info("Image has been downloaded.")
-    matrix_vision = MatrixVision(image.download(), config.properties['fonts_path'])
-    animation_file_id = matrix_vision.run()
-    with open(animation_file_id, 'rb') as animation:
+    user = update.message.from_user
+    animation_file_name = f"{user['id']}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.mp4"
+    matrix_vision.run(animation_file_name)
+    with open(animation_file_name, 'rb') as animation:
         update.message.reply_animation(animation = animation)
+    os.remove(animation_file_name)
+    log.info(f"Remove temporary file {animation_file_name}")
+
 
 
 def reply_to_document(update: Update, context: CallbackContext):
@@ -59,7 +70,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('help', chat_help))
 
     # add replies for image, documents and text messages on Telegram
-    updater.dispatcher.add_handler(MessageHandler(Filters.photo, functools.partial(reply_animation, config = global_config)))
+    updater.dispatcher.add_handler(MessageHandler(Filters.photo, functools.partial(reply_to_image, config = global_config)))
     updater.dispatcher.add_handler(MessageHandler(Filters.document, reply_to_document))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.text, reply_to_text))

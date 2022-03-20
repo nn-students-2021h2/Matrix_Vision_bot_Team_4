@@ -1,14 +1,19 @@
+from io import BytesIO
+import logging
+
 import cv2
-from datetime import datetime
+import imageio
 import numpy as np
 import pygame as pg
+
+log = logging.getLogger(__name__)
 
 
 class Matrix:
     def __init__(self, width, height, font_path):
         self.width = width
         self.height = height
-        self.font_size = 8
+        self.font_size = 7
         self.letters = np.array([chr(int('0x30a0', 16) + i) for i in range(96)] + ['' for i in range(10)])
         self.font = pg.font.Font(font_path, self.font_size, bold=True)
         self.size = self.rows, self.columns = \
@@ -58,10 +63,20 @@ class Matrix:
 
 
 class MatrixVision:
-    def __init__(self, image_name, font_path):
+    def __init__(self, source_data, font_path=None, fps=30, use_opencv=False):
         pg.init()
-        surf = pg.image.load(image_name) # convert_alpha()
-        self.image = pg.pixelarray.PixelArray(surf)
+        surface = None
+        if isinstance(source_data, bytearray):
+            surface = pg.image.load(BytesIO(source_data), '.jpg')
+        elif isinstance(source_data, str):
+            surface = pg.image.load(source_data)
+        else:
+            raise ValueError("Unsupported image source type")
+
+        self.fps = fps
+        self.use_opencv = use_opencv
+
+        self.image = pg.pixelarray.PixelArray(surface)
         self.size = self.width, self.height = self.image.shape[0], self.image.shape[1]
         self.surface = pg.Surface(self.size, pg.SRCALPHA)
         self.screen = pg.display.set_mode(self.size, pg.HIDDEN)
@@ -74,7 +89,7 @@ class MatrixVision:
         self.matrix.run(self.surface, self.image)
         self.screen.blit(self.surface, (0,0))
 
-    def run(self, duration = 100):
+    def run(self, out_name, duration = 100):
         counter = 0
         while counter < duration:
             self.draw()
@@ -82,16 +97,19 @@ class MatrixVision:
             pg.display.flip()
             counter += 1
             self.clock.tick(30)
-        return self.generate_animation()
+        self.generate_animation(out_name)
 
-    def generate_animation(self):
-        video_writer = cv2.VideoWriter()
-        file_name = datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f') + ".mp4"
-        video_writer.open(file_name, cv2.VideoWriter_fourcc(*'MP4V'), 30, self.size)
-        if video_writer.isOpened():
-            for img in self.images:
-                video_writer.write(pg.surfarray.array3d(img).swapaxes(0,1))
-            video_writer.release()
-            return file_name
+    def generate_animation(self, out_name):
+        # prepare file as mp4 because tg reduce size of gifs https://github.com/telegramdesktop/tdesktop/issues/7738
+        if self.use_opencv:
+            video_writer = cv2.VideoWriter()
+            video_writer.open(out_name, cv2.VideoWriter_fourcc(*'MP4V'), self.fps, self.size)
+            if video_writer.isOpened():
+                for img in self.images:
+                    video_writer.write(pg.surfarray.array3d(img).swapaxes(0,1))
+                video_writer.release()
+            else:
+                raise RuntimeError("Can't open cv2.VideoWriter()!")
         else:
-            raise RuntimeError("Can't open cv2.VideoWriter()!")
+            imageio.mimwrite(out_name, [pg.surfarray.array3d(img).swapaxes(0,1) for img in self.images], format='mp4', fps=self.fps)
+        log.info(f"Save result to {out_name}")
