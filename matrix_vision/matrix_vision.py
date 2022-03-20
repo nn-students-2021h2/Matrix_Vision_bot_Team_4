@@ -63,7 +63,7 @@ class Matrix:
 
 
 class MatrixVision:
-    def __init__(self, source_data, font_path=None, fps=30, display=0,use_opencv=False):
+    def __init__(self, source_data, font_path=None, fps=30, use_opencv=False):
         pg.init()
         surface = None
         if isinstance(source_data, bytearray):
