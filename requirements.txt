@@ -2,3 +2,5 @@ opencv-python
 numpy
 pygame
 python-telegram-bot
+imageio
+imageio-ffmpeg
