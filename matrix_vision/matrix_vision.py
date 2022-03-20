@@ -13,7 +13,7 @@ class Matrix:
     def __init__(self, width, height, font_path):
         self.width = width
         self.height = height
-        self.font_size = 8
+        self.font_size = 7
         self.letters = np.array([chr(int('0x30a0', 16) + i) for i in range(96)] + ['' for i in range(10)])
         self.font = pg.font.Font(font_path, self.font_size, bold=True)
         self.size = self.rows, self.columns = \
