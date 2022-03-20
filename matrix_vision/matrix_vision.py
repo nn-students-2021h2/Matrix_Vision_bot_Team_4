@@ -79,7 +79,7 @@ class MatrixVision:
         self.image = pg.pixelarray.PixelArray(surface)
         self.size = self.width, self.height = self.image.shape[0], self.image.shape[1]
         self.surface = pg.Surface(self.size, pg.SRCALPHA)
-        self.screen = pg.Surface(self.size) #pg.display.set_mode(self.size, pg.HIDDEN, display=display)
+        self.screen = pg.Surface(self.size)
         self.clock = pg.time.Clock()
         self.matrix = Matrix(self.width, self.height, font_path)
         self.images = []
@@ -94,8 +94,6 @@ class MatrixVision:
         while counter < duration:
             self.draw()
             self.images.append(self.screen.copy())
-            #self.screen
-            #pg.display.flip()
             counter += 1
             self.clock.tick(30)
         self.generate_animation(out_name)
@@ -113,4 +111,4 @@ class MatrixVision:
                 raise RuntimeError("Can't open cv2.VideoWriter()!")
         else:
             imageio.mimwrite(out_name, [pg.surfarray.array3d(img).swapaxes(0,1) for img in self.images], format='mp4', fps=self.fps)
-        #log.info(f"Save result to {out_name}")
+        log.info(f"Save result to {out_name}")
