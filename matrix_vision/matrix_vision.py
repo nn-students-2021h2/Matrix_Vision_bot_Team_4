@@ -1,10 +1,13 @@
+from datetime import datetime
 from io import BytesIO
 import logging
+import os
 
 import cv2
 import imageio
 import numpy as np
 import pygame as pg
+
 
 log = logging.getLogger(__name__)
 
@@ -89,17 +92,18 @@ class MatrixVision:
         self.matrix.run(self.surface, self.image)
         self.screen.blit(self.surface, (0,0))
 
-    def run(self, out_name, duration = 100):
+    def run(self, out_name=None, duration= 100):
         counter = 0
         while counter < duration:
             self.draw()
             self.images.append(self.screen.copy())
             counter += 1
             self.clock.tick(30)
-        self.generate_animation(out_name)
+        return self.generate_animation(out_name)
 
-    def generate_animation(self, out_name):
+    def generate_animation(self, out_name=None):
         # prepare file as mp4 because tg reduce size of gifs https://github.com/telegramdesktop/tdesktop/issues/7738
+        out_name = out_name if out_name else f"{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.mp4"
         if self.use_opencv:
             video_writer = cv2.VideoWriter()
             video_writer.open(out_name, cv2.VideoWriter_fourcc(*'MP4V'), self.fps, self.size)
@@ -111,4 +115,11 @@ class MatrixVision:
                 raise RuntimeError("Can't open cv2.VideoWriter()!")
         else:
             imageio.mimwrite(out_name, [pg.surfarray.array3d(img).swapaxes(0,1) for img in self.images], format='mp4', fps=self.fps)
-        log.info(f"Save result to {out_name}")
+
+        log.info(f"Saving result to temporary file {out_name}")  # neither opencv nor imageio can't write into file-like object straightly (into io.BytesIO)
+        with open(out_name, 'rb') as animation_file:             # so WA is to save to tmp file and then read to io.BytesIO and delete it afterwards
+            animation = BytesIO(animation_file.read())
+            animation.name = out_name
+        os.remove(out_name)
+        log.info(f"Removed temporary file {out_name}")
+        return animation

@@ -1,8 +1,6 @@
 import copy
-from datetime import datetime
 import functools
 import logging
-import os
 
 from telegram import Update
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler, Updater
@@ -41,21 +39,14 @@ def reply_to_image(update: Update, context: CallbackContext, config: Config):
     """Send animated photo in matrix vision style to user."""
     user = update.message.from_user
     img =  update.message.photo[-1]
-
     matrix_vision = MatrixVision(img.get_file().download_as_bytearray(), config.properties['fonts_path'], fps=30)
-    log.info(f"Image from {user['username']} with ID {user['id']} has been downloaded.")
-
-    animation_file_name = f"{user['id']}_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.mp4"
-    matrix_vision.run(animation_file_name)
-    with open(animation_file_name, 'rb') as animation:
-        update.message.reply_animation(animation = animation)
-
-    os.remove(animation_file_name)
-    log.info(f"Remove temporary file {animation_file_name}")
+    log.info(f"Image from user {user['username']} with ID {user['id']} has been downloaded.")
+    animation = matrix_vision.run()
+    update.message.reply_animation(animation = animation)
 
 
 def reply_to_document(update: Update, context: CallbackContext):
-    """Send echo photo to user."""
+    """Send animated uncompressed photo in matrix vision style to user."""
     update.message.reply_text("Image is expected!")
 
 
