@@ -92,12 +92,17 @@ class MatrixVision:
         self.matrix.run(self.surface, self.image)
         self.screen.blit(self.surface, (0,0))
 
+<<<<<<< HEAD
     def run(self, out_name=None, duration=100):
+=======
+    def run(self, out_name=None, duration= 100):
+>>>>>>> 9199426 (rework animation saving)
         counter = 0
         while counter < duration:
             self.draw()
             self.images.append(self.screen.copy())
             counter += 1
+            self.clock.tick(30)
         return self.generate_animation(out_name)
 
     def generate_animation(self, out_name=None):
@@ -119,7 +124,6 @@ class MatrixVision:
         with open(out_name, 'rb') as animation_file:             # so WA is to save to tmp file and then read to io.BytesIO and delete it afterwards
             animation = BytesIO(animation_file.read())
             animation.name = out_name
-        if not self.save_result:
-            os.remove(out_name)
-            log.info(f"Removed temporary file {out_name}")
+        os.remove(out_name)
+        log.info(f"Removed temporary file {out_name}")
         return animation
