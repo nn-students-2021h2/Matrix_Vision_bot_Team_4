@@ -35,19 +35,24 @@ def reply_to_text(update: Update, context: CallbackContext):
     update.message.reply_text("Image is expected!")
 
 
+def process_input(input_data, fonts_path: str):
+    matrix_vision = MatrixVision(input_data.get_file().download_as_bytearray(), fonts_path, fps=30)
+    return matrix_vision.run()
+
 def reply_to_image(update: Update, context: CallbackContext, config: Config):
     """Send animated photo in matrix vision style to user."""
     user = update.message.from_user
-    img =  update.message.photo[-1]
-    matrix_vision = MatrixVision(img.get_file().download_as_bytearray(), config.properties['fonts_path'], fps=30)
     log.info(f"Image from user {user['username']} with ID {user['id']} has been downloaded.")
-    animation = matrix_vision.run()
+    animation = process_input(update.message.photo[-1], config.properties['fonts_path'])
     update.message.reply_animation(animation = animation)
 
 
-def reply_to_document(update: Update, context: CallbackContext):
+def reply_to_document(update: Update, context: CallbackContext, config: Config):
     """Send animated uncompressed photo in matrix vision style to user."""
-    update.message.reply_text("Image is expected!")
+    user = update.message.from_user
+    log.info(f"Document from user {user['username']} with ID {user['id']} has been downloaded.")
+    animation = process_input(update.message.document, config.properties['fonts_path'])
+    update.message.reply_document(document=animation)
 
 
 def error(update: Update, context: CallbackContext):
@@ -67,7 +72,7 @@ def main():
 
     # add replies for image, documents and text messages on Telegram
     updater.dispatcher.add_handler(MessageHandler(Filters.photo, functools.partial(reply_to_image, config = copy.deepcopy(global_config))))
-    updater.dispatcher.add_handler(MessageHandler(Filters.document, reply_to_document))
+    updater.dispatcher.add_handler(MessageHandler(Filters.document, functools.partial(reply_to_document, config = copy.deepcopy(global_config))))
 
     updater.dispatcher.add_handler(MessageHandler(Filters.text, reply_to_text))
 

@@ -66,7 +66,7 @@ class Matrix:
 
 
 class MatrixVision:
-    def __init__(self, source_data, font_path=None, fps=30, use_opencv=False):
+    def __init__(self, source_data, font_path=None, fps=30, use_opencv=False, save_result=False):
         pg.init()
         surface = None
         if isinstance(source_data, bytearray):
@@ -83,7 +83,6 @@ class MatrixVision:
         self.size = self.width, self.height = self.image.shape[0], self.image.shape[1]
         self.surface = pg.Surface(self.size, pg.SRCALPHA)
         self.screen = pg.Surface(self.size)
-        self.clock = pg.time.Clock()
         self.matrix = Matrix(self.width, self.height, font_path)
         self.images = []
 
@@ -98,7 +97,6 @@ class MatrixVision:
             self.draw()
             self.images.append(self.screen.copy())
             counter += 1
-            self.clock.tick(30)
         return self.generate_animation(out_name)
 
     def generate_animation(self, out_name=None):
@@ -120,6 +118,7 @@ class MatrixVision:
         with open(out_name, 'rb') as animation_file:             # so WA is to save to tmp file and then read to io.BytesIO and delete it afterwards
             animation = BytesIO(animation_file.read())
             animation.name = out_name
-        os.remove(out_name)
-        log.info(f"Removed temporary file {out_name}")
+        if not self.save_result:
+            os.remove(out_name)
+            log.info(f"Removed temporary file {out_name}")
         return animation
