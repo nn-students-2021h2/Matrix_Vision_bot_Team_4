@@ -92,11 +92,7 @@ class MatrixVision:
         self.matrix.run(self.surface, self.image)
         self.screen.blit(self.surface, (0,0))
 
-<<<<<<< HEAD
     def run(self, out_name=None, duration=100):
-=======
-    def run(self, out_name=None, duration= 100):
->>>>>>> 9199426 (rework animation saving)
         counter = 0
         while counter < duration:
             self.draw()
