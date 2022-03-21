@@ -78,6 +78,7 @@ class MatrixVision:
 
         self.fps = fps
         self.use_opencv = use_opencv
+        self.save_result = save_result
 
         self.image = pg.pixelarray.PixelArray(surface)
         self.size = self.width, self.height = self.image.shape[0], self.image.shape[1]
@@ -91,7 +92,7 @@ class MatrixVision:
         self.matrix.run(self.surface, self.image)
         self.screen.blit(self.surface, (0,0))
 
-    def run(self, out_name=None, duration= 100):
+    def run(self, out_name=None, duration=100):
         counter = 0
         while counter < duration:
             self.draw()

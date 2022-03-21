@@ -36,8 +36,9 @@ def reply_to_text(update: Update, context: CallbackContext):
 
 
 def process_input(input_data, fonts_path: str):
-    matrix_vision = MatrixVision(input_data.get_file().download_as_bytearray(), fonts_path, fps=30)
+    matrix_vision = MatrixVision(input_data.get_file().download_as_bytearray(), fonts_path, fps=30, use_opencv=True)
     return matrix_vision.run()
+
 
 def reply_to_image(update: Update, context: CallbackContext, config: Config):
     """Send animated photo in matrix vision style to user."""
